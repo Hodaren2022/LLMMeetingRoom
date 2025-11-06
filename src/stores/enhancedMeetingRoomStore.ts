@@ -47,6 +47,7 @@ interface MeetingRoomState {
   stopDebate: () => void;
   nextRound: () => void;
   resetDebate: () => void;
+  generateTopicFromStatement: (statement: string) => Promise<void>;
   
   // 發言管理
   addStatement: (statement: Omit<Statement, 'id' | 'timestamp'>) => void;
@@ -538,6 +539,38 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
           error: null,
           userPreferences: defaultUserPreferences,
         }),
+
+        // 主題生成
+        generateTopicFromStatement: async (statement: string) => {
+          try {
+            const response = await fetch('/api/generate-topic', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                firstStatement: statement,
+                context: get().currentRoom?.name,
+              }),
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              const generatedTopic = data.topic;
+              
+              const currentRoom = get().currentRoom;
+              if (currentRoom && generatedTopic) {
+                get().updateRoom(currentRoom.id, {
+                  topic: generatedTopic,
+                  isTopicGenerated: true,
+                });
+              }
+            }
+          } catch (error) {
+            console.error('生成主題失敗:', error);
+            // 靜默失敗，不影響辯論流程
+          }
+        },
       }),
       {
         name: 'meeting-room-storage',

@@ -381,8 +381,9 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
             const data = await response.json();
             const generatedTopic = data.topic;
             
-            if (get().currentRoom && generatedTopic) {
-              get().updateRoom(get().currentRoom.id, {
+            const currentRoom = get().currentRoom;
+            if (currentRoom && generatedTopic) {
+              get().updateRoom(currentRoom.id, {
                 topic: generatedTopic,
                 isTopicGenerated: true,
               });
