@@ -19,6 +19,7 @@ export const useDebateOrchestrator = () => {
     setError,
     setLoading,
     nextRound,
+    generateTopicFromStatement,
   } = useMeetingRoomStore();
 
   // 初始化協調器
@@ -68,13 +69,11 @@ export const useDebateOrchestrator = () => {
         addStatement(statement);
         
         // 如果這是第一個發言且主題未設定或為默認值，自動生成主題
-        const store = useMeetingRoomStore.getState();
-        const currentRoom = store.currentRoom;
         if (currentRoom && 
             (currentRoom.topic === '討論議題' || currentRoom.topic === '' || !currentRoom.topic) &&
             currentRoom.statements.length === 0) {
           // 使用新添加的發言生成主題
-          store.generateTopicFromStatement(statement.content);
+          generateTopicFromStatement(statement.content);
         }
       },
       
@@ -107,6 +106,7 @@ export const useDebateOrchestrator = () => {
     setError,
     setLoading,
     nextRound,
+    generateTopicFromStatement,
   ]);
 
   // 初始化辯論
