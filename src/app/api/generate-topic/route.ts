@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateGeminiResponse } from '@/services/geminiService';
+import { getGeminiService } from '@/services/geminiService';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,32 +32,27 @@ ${context ? `會議背景：${context}` : ''}
 請直接返回主題，不需要其他說明。
 `;
 
-    const response = await generateGeminiResponse({
-      prompt,
-      persona: {
-        id: 'topic-generator',
-        name: '主題生成器',
-        role: '會議主題分析師',
-        systemPrompt: '你是一個專業的會議主題分析師，擅長從討論內容中提取核心議題並生成簡潔的主題。',
-        ragFocus: ['會議管理', '主題分析'],
+    // 使用簡化的 Gemini API 調用來生成主題
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error('GEMINI_API_KEY is not configured');
+    }
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
         temperature: 0.3,
-      },
-      context: {
-        topic: '主題生成',
-        currentRound: 1,
-        maxRounds: 1,
-        previousStatements: [],
-        searchResults: [],
-        activePersonas: [],
+        maxOutputTokens: 100,
       },
     });
 
-    if (response.error) {
-      throw new Error(response.error);
-    }
+    const content = result.response?.text() || '';
 
     // 清理生成的主題，移除引號和多餘的文字
-    let topic = response.content.trim();
+    let topic = content.trim();
     topic = topic.replace(/^["「『]|["」』]$/g, ''); // 移除首尾引號
     topic = topic.replace(/^主題：|^會議主題：/g, ''); // 移除前綴
     topic = topic.trim();
