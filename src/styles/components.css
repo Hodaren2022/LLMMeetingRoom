@@ -1,30 +1,3 @@
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 /* 添加 line-clamp 工具類 */
 @layer utilities {
   .line-clamp-1 {
@@ -97,6 +70,16 @@ body {
   @apply bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors hover:bg-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-500/20 disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
+/* 響應式間距 */
+.container-padding {
+  @apply px-4 sm:px-6 lg:px-8;
+}
+
+/* 文字截斷 */
+.text-truncate {
+  @apply overflow-hidden whitespace-nowrap text-ellipsis;
+}
+
 /* 滾動條樣式 */
 .custom-scrollbar {
   scrollbar-width: thin;
@@ -119,37 +102,4 @@ body {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
-}
-
-/* 響應式間距和布局 */
-@media (max-width: 640px) {
-  .container-padding {
-    @apply px-3;
-  }
-}
-
-/* 確保容器高度正確 */
-.full-height-container {
-  height: calc(100vh - 120px);
-  min-height: 400px;
-}
-
-/* 網格響應式優化 */
-.responsive-grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-}
-
-@media (min-width: 640px) {
-  .responsive-grid {
-    gap: 1.5rem;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .responsive-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
 }
