@@ -2,26 +2,45 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 /**
+ * 辯論記錄接口
+ */
+export interface DebateRecord {
+  id: string;
+  roomId: string;
+  roomName: string;
+  topic: string;
+  participants: string[];
+  startTime: number;
+  endTime?: number;
+  totalRounds: number;
+  finalConsensus?: {
+    supportRate: number;
+    opposeRate: number;
+    consensusReached: boolean;
+  };
+  keyInsights: string[];
+}
+
+/**
+ * 通知接口
+ */
+export interface Notification {
+  id: string;
+  type: 'info' | 'warning' | 'error' | 'success';
+  title: string;
+  message: string;
+  timestamp: number;
+  read: boolean;
+  autoHide?: boolean;
+  duration?: number;
+}
+
+/**
  * 辯論歷史和分析存儲
  */
 interface DebateHistoryState {
   // 歷史記錄
-  debateHistory: Array<{
-    id: string;
-    roomId: string;
-    roomName: string;
-    topic: string;
-    participants: string[];
-    startTime: number;
-    endTime?: number;
-    totalRounds: number;
-    finalConsensus?: {
-      supportRate: number;
-      opposeRate: number;
-      consensusReached: boolean;
-    };
-    keyInsights: string[];
-  }>;
+  debateHistory: DebateRecord[];
   
   // 分析數據
   analytics: {
@@ -33,9 +52,9 @@ interface DebateHistoryState {
   };
   
   // Actions
-  addDebateRecord: (record: unknown) => void;
-  getDebatesByTopic: (topic: string) => unknown[];
-  getDebatesByPersona: (personaId: string) => unknown[];
+  addDebateRecord: (record: DebateRecord) => void;
+  getDebatesByTopic: (topic: string) => DebateRecord[];
+  getDebatesByPersona: (personaId: string) => DebateRecord[];
   getAnalytics: () => Record<string, unknown>;
   clearHistory: () => void;
   exportHistory: () => string;
@@ -51,17 +70,15 @@ export const useDebateHistoryStore = create<DebateHistoryState>()(
         averageRounds: 0,
         consensusRate: 0,
         mostActivePersonas: [],
-        topTopics: [],
+        topTopics: []
       },
       
-      addDebateRecord: (record) => {
+      addDebateRecord: (record: DebateRecord) => {
         set((state) => {
           const newHistory = [...state.debateHistory, record];
-          const analytics = calculateAnalytics(newHistory);
-          
           return {
             debateHistory: newHistory,
-            analytics,
+            analytics: calculateAnalytics(newHistory)
           };
         });
       },
@@ -78,7 +95,9 @@ export const useDebateHistoryStore = create<DebateHistoryState>()(
         );
       },
       
-      getAnalytics: () => get().analytics,
+      getAnalytics: () => {
+        return get().analytics;
+      },
       
       clearHistory: () => {
         set({
@@ -88,8 +107,8 @@ export const useDebateHistoryStore = create<DebateHistoryState>()(
             averageRounds: 0,
             consensusRate: 0,
             mostActivePersonas: [],
-            topTopics: [],
-          },
+            topTopics: []
+          }
         });
       },
       
@@ -97,7 +116,7 @@ export const useDebateHistoryStore = create<DebateHistoryState>()(
         const data = {
           debateHistory: get().debateHistory,
           exportTime: Date.now(),
-          version: '1.0',
+          version: '1.0'
         };
         return JSON.stringify(data, null, 2);
       },
@@ -109,7 +128,7 @@ export const useDebateHistoryStore = create<DebateHistoryState>()(
             const analytics = calculateAnalytics(parsed.debateHistory);
             set({
               debateHistory: parsed.debateHistory,
-              analytics,
+              analytics
             });
             return true;
           }
@@ -117,16 +136,18 @@ export const useDebateHistoryStore = create<DebateHistoryState>()(
         } catch {
           return false;
         }
-      },
+      }
     }),
-    { name: 'debate-history-store' }
+    {
+      name: 'debate-history-store'
+    }
   )
 );
 
 /**
  * 計算分析數據
  */
-function calculateAnalytics(history: unknown[]) {
+function calculateAnalytics(history: DebateRecord[]) {
   const totalDebates = history.length;
   
   if (totalDebates === 0) {
@@ -135,36 +156,37 @@ function calculateAnalytics(history: unknown[]) {
       averageRounds: 0,
       consensusRate: 0,
       mostActivePersonas: [],
-      topTopics: [],
+      topTopics: []
     };
   }
   
-  const averageRounds = history.reduce((sum, debate) => sum + debate.totalRounds, 0) / totalDebates;
+  const totalRounds = history.reduce((sum, debate) => sum + debate.totalRounds, 0);
+  const averageRounds = totalRounds / totalDebates;
   
-  const consensusCount = history.filter(debate => debate.finalConsensus?.consensusReached).length;
+  const consensusCount = history.filter(debate => 
+    debate.finalConsensus?.consensusReached
+  ).length;
   const consensusRate = consensusCount / totalDebates;
   
   // 統計最活躍的替身
-  const personaParticipation: Record<string, number> = {};
-  history.forEach(debate => {
-    debate.participants.forEach((personaId: string) => {
-      personaParticipation[personaId] = (personaParticipation[personaId] || 0) + 1;
+  const personaStats: Record<string, number> = {};
+  history.forEach(debate => {    debate.participants.forEach(personaId => {
+      personaStats[personaId] = (personaStats[personaId] || 0) + 1;
     });
   });
   
-  const mostActivePersonas = Object.entries(personaParticipation)
+  const mostActivePersonas = Object.entries(personaStats)
     .map(([personaId, count]) => ({ personaId, participationCount: count }))
     .sort((a, b) => b.participationCount - a.participationCount)
     .slice(0, 5);
   
-  // 統計熱門議題
-  const topicCount: Record<string, number> = {};
+  // 統計熱門話題
+  const topicStats: Record<string, number> = {};
   history.forEach(debate => {
-    const topic = debate.topic;
-    topicCount[topic] = (topicCount[topic] || 0) + 1;
+    topicStats[debate.topic] = (topicStats[debate.topic] || 0) + 1;
   });
   
-  const topTopics = Object.entries(topicCount)
+  const topTopics = Object.entries(topicStats)
     .map(([topic, count]) => ({ topic, debateCount: count }))
     .sort((a, b) => b.debateCount - a.debateCount)
     .slice(0, 10);
@@ -174,7 +196,7 @@ function calculateAnalytics(history: unknown[]) {
     averageRounds,
     consensusRate,
     mostActivePersonas,
-    topTopics,
+    topTopics
   };
 }
 
@@ -182,19 +204,10 @@ function calculateAnalytics(history: unknown[]) {
  * 通知系統存儲
  */
 interface NotificationState {
-  notifications: Array<{
-    id: string;
-    type: 'info' | 'success' | 'warning' | 'error';
-    title: string;
-    message: string;
-    timestamp: number;
-    read: boolean;
-    autoClose?: boolean;
-    duration?: number;
-  }>;
+  notifications: Notification[];
   
   // Actions
-  addNotification: (notification: unknown) => void;
+  addNotification: (notification: Notification) => void;
   markAsRead: (id: string) => void;
   removeNotification: (id: string) => void;
   clearAll: () => void;
@@ -206,40 +219,35 @@ export const useNotificationStore = create<NotificationState>()(
     (set, get) => ({
       notifications: [],
       
-      addNotification: (notification) => {
-        const id = Math.random().toString(36).substr(2, 9);
-        const newNotification = {
-          id,
-          timestamp: Date.now(),
-          read: false,
-          autoClose: true,
-          duration: 5000,
-          ...notification,
-        };
-        
+      addNotification: (notification: Notification) => {
         set((state) => ({
-          notifications: [newNotification, ...state.notifications],
+          notifications: [notification, ...state.notifications]
         }));
         
-        // 自動關閉通知
-        if (newNotification.autoClose) {
+        // 自動隱藏通知
+        if (notification.autoHide !== false) {
+          const duration = notification.duration || 5000;
           setTimeout(() => {
-            get().removeNotification(id);
-          }, newNotification.duration);
+            get().removeNotification(notification.id);
+          }, duration);
         }
       },
       
       markAsRead: (id: string) => {
         set((state) => ({
           notifications: state.notifications.map(notification =>
-            notification.id === id ? { ...notification, read: true } : notification
-          ),
+            notification.id === id 
+              ? { ...notification, read: true }
+              : notification
+          )
         }));
       },
       
       removeNotification: (id: string) => {
         set((state) => ({
-          notifications: state.notifications.filter(notification => notification.id !== id),
+          notifications: state.notifications.filter(notification => 
+            notification.id !== id
+          )
         }));
       },
       
@@ -249,12 +257,80 @@ export const useNotificationStore = create<NotificationState>()(
       
       getUnreadCount: () => {
         return get().notifications.filter(notification => !notification.read).length;
-      },
+      }
     }),
-    { name: 'notification-store' }
+    {
+      name: 'notification-store'
+    }
   )
 );
 
-const additionalStoresExports = { useDebateHistoryStore, useNotificationStore };
+/**
+ * 用戶偏好設定存儲
+ */
+interface UserPreferencesState {
+  preferences: {
+    theme: 'light' | 'dark' | 'auto';
+    language: 'zh-TW' | 'zh-CN' | 'en';
+    autoSave: boolean;
+    notificationSettings: {
+      debateStart: boolean;
+      debateEnd: boolean;
+      consensusReached: boolean;
+      newStatement: boolean;
+    };
+    displaySettings: {
+      showTimestamps: boolean;
+      showSourceLinks: boolean;
+      compactMode: boolean;
+    };
+  };
+  
+  // Actions
+  updatePreference: <K extends keyof UserPreferencesState['preferences']>(
+    key: K, 
+    value: UserPreferencesState['preferences'][K]
+  ) => void;
+  resetToDefaults: () => void;
+}
 
-export default additionalStoresExports;
+const defaultPreferences: UserPreferencesState['preferences'] = {
+  theme: 'auto',
+  language: 'zh-TW',
+  autoSave: true,
+  notificationSettings: {
+    debateStart: true,
+    debateEnd: true,
+    consensusReached: true,
+    newStatement: false
+  },
+  displaySettings: {
+    showTimestamps: true,
+    showSourceLinks: true,
+    compactMode: false
+  }
+};
+
+export const useUserPreferencesStore = create<UserPreferencesState>()(
+  devtools(
+    (set) => ({
+      preferences: defaultPreferences,
+      
+      updatePreference: (key, value) => {
+        set((state) => ({
+          preferences: {
+            ...state.preferences,
+            [key]: value
+          }
+        }));
+      },
+      
+      resetToDefaults: () => {
+        set({ preferences: defaultPreferences });
+      }
+    }),
+    {
+      name: 'user-preferences-store'
+    }
+  )
+);

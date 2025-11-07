@@ -1,4 +1,4 @@
-import { getCLS, getFID, getFCP, getLCP, getTTFB, Metric } from 'web-vitals';
+import { onCLS, onINP, onFCP, onLCP, onTTFB, Metric } from 'web-vitals';
 
 /**
  * Web Vitals 監控配置
@@ -8,12 +8,12 @@ export interface WebVitalsConfig {
   enableAnalytics?: boolean;
   analyticsEndpoint?: string;
   thresholds?: {
-    LCP?: number;
-    FID?: number;
-    CLS?: number;
-    FCP?: number;
-    TTFB?: number;
-  };
+      LCP?: number;
+      INP?: number;
+      CLS?: number;
+      FCP?: number;
+      TTFB?: number;
+    };
 }
 
 /**
@@ -42,7 +42,7 @@ export class WebVitalsMonitor {
       enableAnalytics: false,
       thresholds: {
         LCP: 2500,  // 2.5s
-        FID: 100,   // 100ms
+        INP: 200,   // 200ms
         CLS: 0.1,   // 0.1
         FCP: 1800,  // 1.8s
         TTFB: 800   // 800ms
@@ -58,13 +58,13 @@ export class WebVitalsMonitor {
    */
   private initializeMonitoring(): void {
     // 監控 Core Web Vitals
-    getCLS(this.handleMetric.bind(this));
-    getFID(this.handleMetric.bind(this));
-    getLCP(this.handleMetric.bind(this));
+    onCLS(this.handleMetric.bind(this));
+    onINP(this.handleMetric.bind(this));
+    onLCP(this.handleMetric.bind(this));
     
     // 監控其他重要指標
-    getFCP(this.handleMetric.bind(this));
-    getTTFB(this.handleMetric.bind(this));
+    onFCP(this.handleMetric.bind(this));
+    onTTFB(this.handleMetric.bind(this));
 
     // 自定義性能監控
     this.setupCustomObservers();
@@ -175,7 +175,7 @@ export class WebVitalsMonitor {
       'TCP Connection': entry.connectEnd - entry.connectStart,
       'Request': entry.responseStart - entry.requestStart,
       'Response': entry.responseEnd - entry.responseStart,
-      'DOM Processing': entry.domComplete - entry.domLoading
+      'DOM Processing': entry.domComplete - entry.domContentLoadedEventStart
     };
 
     for (const [name, value] of Object.entries(metrics)) {
@@ -221,8 +221,8 @@ export class WebVitalsMonitor {
     switch (metricName) {
       case 'LCP':
         return value <= 2500 ? 'good' : value <= 4000 ? 'needs-improvement' : 'poor';
-      case 'FID':
-        return value <= 100 ? 'good' : value <= 300 ? 'needs-improvement' : 'poor';
+      case 'INP':
+        return value <= 200 ? 'good' : value <= 500 ? 'needs-improvement' : 'poor';
       case 'CLS':
         return value <= 0.1 ? 'good' : value <= 0.25 ? 'needs-improvement' : 'poor';
       case 'FCP':
@@ -272,7 +272,7 @@ export class WebVitalsMonitor {
       console.warn(`Poor ${metric.name} performance detected: ${metric.value}ms`);
       
       // 提供優化建議
-      this.provideOptimizationSuggestions(metric.name, metric.value);
+      this.provideOptimizationSuggestions(metric.name);
     }
   }
 
@@ -287,11 +287,13 @@ export class WebVitalsMonitor {
         '減少關鍵渲染路徑中的資源',
         '使用 preload 預加載重要資源'
       ],
-      'FID': [
+      'INP': [
         '減少 JavaScript 執行時間',
         '使用 Web Workers 處理重計算',
         '優化事件處理器',
-        '延遲載入非關鍵 JavaScript'
+        '延遲載入非關鍵 JavaScript',
+        '避免長時間運行的任務',
+        '優化第三方腳本'
       ],
       'CLS': [
         '為圖片和廣告設置尺寸屬性',
@@ -346,7 +348,7 @@ export class WebVitalsMonitor {
     let poorCount = 0;
 
     for (const [name, metric] of this.metrics) {
-      if (['LCP', 'FID', 'CLS'].includes(metric.name)) {
+      if (['LCP', 'INP', 'CLS'].includes(metric.name)) {
         coreWebVitals[name] = metric;
       } else {
         otherMetrics[name] = metric;

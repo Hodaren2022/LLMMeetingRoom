@@ -12,6 +12,12 @@ export interface ViewportConfig {
   deviceType: 'mobile' | 'tablet' | 'desktop';
 }
 
+export interface PerformanceEntry {
+  duration?: number;
+  value?: number;
+  hadRecentInput?: boolean;
+}
+
 export interface ResponsiveTestConfig {
   viewports: ViewportConfig[];
   elements: string[];
@@ -280,12 +286,15 @@ export class ResponsiveTestHelper {
           checkComplete();
         }).observe({ entryTypes: ['largest-contentful-paint'] });
         
-        // 測量 FID
+        // 測量 INP (替代 FID)
         new PerformanceObserver((list) => {
           const entries = list.getEntries();
-          metrics.fid = entries[0].processingStart - entries[0].startTime;
-          checkComplete();
-        }).observe({ entryTypes: ['first-input'] });
+          if (entries.length > 0) {
+            const entry = entries[0] as PerformanceEntry;
+            metrics.inp = entry.duration || 0;
+            checkComplete();
+          }
+        }).observe({ entryTypes: ['event'] });
         
         // 測量 CLS
         let clsValue = 0;

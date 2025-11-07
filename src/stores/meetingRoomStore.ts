@@ -196,8 +196,8 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
       },
 
       updateRoom: (roomId: string, updates: Partial<MeetingRoom>) => {
-        set(() => ({
-          rooms: state.rooms.map(room =>
+        set((state) => ({
+          rooms: state.rooms.map((room: import('@/types').MeetingRoom) =>
             room.id === roomId
               ? { ...room, ...updates, updatedAt: Date.now() }
               : room
@@ -209,7 +209,7 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
       },
 
       deleteRoom: (roomId: string) => {
-        set(() => ({
+        set((state) => ({
           rooms: state.rooms.filter(room => room.id !== roomId),
           currentRoom: state.currentRoom?.id === roomId ? null : state.currentRoom,
         }));
@@ -416,28 +416,33 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
       version: 1,
       migrate: (persistedState: unknown, version: number) => {
         if (version === 0) {
+          const state = persistedState as import('@/types/gemini').PersistedState;
           // 從版本0遷移到版本1
           return {
-            ...persistedState,
-            // 確保設置中的超時時間至少30秒
-            rooms: (persistedState as { rooms?: unknown[] })?.rooms?.map((room: unknown) => ({
-              ...room,
-              settings: {
-                maxRounds: 5,
-                consensusThreshold: 0.7,
-                timeoutPerRound: Math.max(30000, room.settings?.timeoutPerRound || 300000), // 至少30秒
-                allowUserIntervention: true,
-                autoSaveInterval: 30,
-                ...room.settings
-              }
-            })) || []
+            rooms: state?.rooms?.map((room: unknown) => {
+              const typedRoom = room as import('@/types').MeetingRoom;
+              
+              return {
+                ...typedRoom,
+                settings: {
+                  // 默認值
+                  maxRounds: typedRoom.settings?.maxRounds || 5,
+                  consensusThreshold: typedRoom.settings?.consensusThreshold || 0.7,
+                  timeoutPerRound: Math.max(30000, typedRoom.settings?.timeoutPerRound || 300000),
+                  allowUserIntervention: typedRoom.settings?.allowUserIntervention !== undefined ? 
+                    typedRoom.settings.allowUserIntervention : true,
+                  autoSaveInterval: typedRoom.settings?.autoSaveInterval || 30,
+                }
+              };
+            }) || [],
+            availablePersonas: state?.availablePersonas || []
           };
         }
-        return persistedState;
+        return persistedState as import('@/types/gemini').PersistedState;
       },
       partialize: (state) => ({
-        rooms: state.rooms,
-        availablePersonas: state.availablePersonas,
+        rooms: state.rooms as unknown[],
+        availablePersonas: state.availablePersonas as unknown[],
       }),
     }
   )

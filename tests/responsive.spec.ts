@@ -1,5 +1,13 @@
 import { test, expect, Page } from '@playwright/test';
 
+interface PerformanceMetrics {
+  LCP?: number;
+  FID?: number;
+  CLS?: number;
+  INP?: number;
+  TTFB?: number;
+}
+
 /**
  * 響應式設計測試工具
  */
@@ -130,7 +138,7 @@ test.describe('響應式設計測試', () => {
     ];
 
     for (const viewport of viewports) {
-      await utils.setViewport(viewport.width, viewport.height);
+      await page.setViewportSize(viewport);
       
       // 檢查主要元素是否可見
       await expect(page.locator('h1')).toBeVisible();
@@ -273,8 +281,8 @@ test.describe('響應式性能測試', () => {
     });
     
     // LCP 應該小於 2.5 秒
-    if (metrics.LCP) {
-      expect(metrics.LCP).toBeLessThan(2500);
+    if ((metrics as PerformanceMetrics).LCP) {
+      expect((metrics as PerformanceMetrics).LCP).toBeLessThan(2500);
     }
   });
 
@@ -286,8 +294,13 @@ test.describe('響應式性能測試', () => {
     
     page.on('response', (response) => {
       if (response.url().match(/\.(jpg|jpeg|png|webp|avif)$/)) {
-        const timing = response.timing();
-        imageLoadTimes.push(timing.responseEnd - timing.requestStart);
+        // Note: response.timing() is not available in Playwright
+        // Using alternative approach to measure image load time
+        const startTime = Date.now();
+        response.finished().then(() => {
+          const loadTime = Date.now() - startTime;
+          imageLoadTimes.push(loadTime);
+        });
       }
     });
     
@@ -314,7 +327,7 @@ test.describe('響應式可訪問性測試', () => {
     ];
     
     for (const viewport of viewports) {
-      await utils.setViewport(viewport.width, viewport.height);
+      await page.setViewportSize(viewport);
       
       // 測試 Tab 鍵導航
       await page.keyboard.press('Tab');

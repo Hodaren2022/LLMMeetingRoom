@@ -7,7 +7,7 @@ export class SourceProcessor {
   /**
    * 處理 Gemini 回應中的來源引用
    */
-  static processGroundingMetadata(response: unknown): SourceReference[] {
+  static processGroundingMetadata(response: import('@/types/gemini').GeminiApiResponse): import('@/types/gemini').SourceReference[] {
     const sources: SourceReference[] = [];
     
     try {
@@ -17,8 +17,8 @@ export class SourceProcessor {
       }
 
       const chunks = groundingMetadata.groundingChunks;
-      chunks.forEach((chunk: unknown, index: number) => {
-        if (chunk.web) {
+      chunks.forEach((chunk: import('@/types/gemini').GroundingChunk, index: number) => {
+        if (chunk.web && chunk.web.uri) {
           sources.push({
             url: chunk.web.uri,
             title: chunk.web.title || `來源 ${index + 1}`,
@@ -41,7 +41,7 @@ export class SourceProcessor {
   /**
    * 為文本添加內聯引用
    */
-  static addInlineCitations(text: string, groundingMetadata: unknown): string {
+  static addInlineCitations(text: string, groundingMetadata: import('@/types/gemini').GroundingMetadata): string {
     try {
       if (!groundingMetadata?.groundingSupports || !groundingMetadata?.groundingChunks) {
         return text;
@@ -90,7 +90,7 @@ export class SourceProcessor {
   /**
    * 提取搜尋查詢
    */
-  static extractSearchQueries(groundingMetadata: unknown): string[] {
+  static extractSearchQueries(groundingMetadata: import('@/types/gemini').GroundingMetadata): string[] {
     try {
       return groundingMetadata?.webSearchQueries || [];
     } catch (error) {

@@ -33,7 +33,7 @@ class GeminiService {
   /**
    * 解析 Gemini 回應
    */
-  private parseGeminiResponse(response: unknown): GeminiResponse {
+  private parseGeminiResponse(response: import('@/types/gemini').GeminiApiResponse): import('@/types/gemini').GeminiResponse {
     try {
       const content = response.response?.text() || '';
       
@@ -44,20 +44,22 @@ class GeminiService {
       const sources = SourceProcessor.processGroundingMetadata(response);
       const validatedSources = SourceProcessor.validateSources(sources);
       
+      // 安全地獲取 groundingMetadata
+      const groundingMetadata = response.response?.candidates?.[0]?.groundingMetadata;
+      
       // 添加內聯引用
-      const contentWithCitations = SourceProcessor.addInlineCitations(
-        parsed.cleanContent, 
-        response.response?.candidates?.[0]?.groundingMetadata
-      );
+      const contentWithCitations = groundingMetadata 
+        ? SourceProcessor.addInlineCitations(parsed.cleanContent, groundingMetadata)
+        : parsed.cleanContent;
 
       return {
         content: contentWithCitations,
         tendencyScore: parsed.tendencyScore,
         reasoning: parsed.reasoning,
         sources: validatedSources,
-        searchQueries: SourceProcessor.extractSearchQueries(
-          response.response?.candidates?.[0]?.groundingMetadata
-        ),
+        searchQueries: groundingMetadata 
+          ? SourceProcessor.extractSearchQueries(groundingMetadata)
+          : [],
       };
     } catch (error) {
       console.error('Error parsing Gemini response:', error);
@@ -104,7 +106,15 @@ class GeminiService {
         },
       });
 
-      const response = this.parseGeminiResponse(result);
+      // 轉換為相容的格式
+      const compatibleResult = {
+        response: {
+          text: () => result.response?.text() || '',
+          candidates: result.response?.candidates
+        }
+      };
+
+      const response = this.parseGeminiResponse(compatibleResult);
       
       // 快取成功的回應（較短的 TTL，因為辯論內容時效性強）
       GeminiCache.set(cacheKey, response, 2 * 60 * 1000); // 2 分鐘
@@ -142,7 +152,15 @@ class GeminiService {
         },
       });
 
-      const sources = SourceProcessor.processGroundingMetadata(result);
+      // 轉換為相容的格式
+      const compatibleResult = {
+        response: {
+          text: () => result.response?.text() || '',
+          candidates: result.response?.candidates
+        }
+      };
+
+      const sources = SourceProcessor.processGroundingMetadata(compatibleResult);
       const validatedSources = SourceProcessor.validateSources(sources);
       
       // 快取搜尋結果（較長的 TTL，因為搜尋結果相對穩定）

@@ -257,7 +257,7 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
             color: persona.color || PersonaEngine.suggestPersonaColor(persona as Persona),
           };
           
-          set(() => ({
+          set((state) => ({
             availablePersonas: [...state.availablePersonas, newPersona],
           }));
         },
@@ -575,9 +575,9 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
       {
         name: 'meeting-room-storage',
         partialize: (state) => ({
-          rooms: state.rooms,
-          availablePersonas: state.availablePersonas,
-          userPreferences: state.userPreferences,
+          rooms: state.rooms as unknown[],
+          availablePersonas: state.availablePersonas as unknown[],
+          userPreferences: state.userPreferences as import('@/types/gemini').PersistedState['userPreferences'],
         }),
         version: 1,
         migrate: (persistedState: unknown, version: number) => {
@@ -586,25 +586,27 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
             return {
               rooms: [],
               availablePersonas: defaultPersonas,
-              userPreferences: defaultUserPreferences,
+              userPreferences: {},
             };
           }
+
+          const state = persistedState as import('@/types/gemini').PersistedState;
 
           // 版本遷移邏輯
           if (version === 0 || !version) {
             // 從版本 0 或無版本升級到版本 1
             return {
-              rooms: persistedState.rooms || [],
-              availablePersonas: persistedState.availablePersonas || defaultPersonas,
-              userPreferences: persistedState.userPreferences || defaultUserPreferences,
+              rooms: state.rooms || [],
+              availablePersonas: state.availablePersonas || defaultPersonas,
+              userPreferences: {},
             };
           }
 
           // 確保所有必要字段存在
           return {
-            rooms: persistedState.rooms || [],
-            availablePersonas: persistedState.availablePersonas || defaultPersonas,
-            userPreferences: persistedState.userPreferences || defaultUserPreferences,
+            rooms: state.rooms || [],
+            availablePersonas: state.availablePersonas || defaultPersonas,
+            userPreferences: {},
           };
         },
       }
@@ -612,7 +614,7 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
   )
 );
 
-// 訂閱狀態變化以實現自動保存
+// 訢閱狀態變化以實現自動保存
 useMeetingRoomStore.subscribe(
   (state) => state.userPreferences.autoSave,
   (autoSave) => {

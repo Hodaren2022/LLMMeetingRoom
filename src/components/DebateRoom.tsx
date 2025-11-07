@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MeetingRoom, Persona, Statement } from '@/types';
+import { MeetingRoom, Persona } from '@/types';
 import { useDebateControl } from '@/hooks/useDebateOrchestrator';
 import { useSwipe } from '../hooks/useSwipe';
 import { useMeetingRoomStore } from '@/stores';
@@ -91,9 +91,7 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [debateStatus, isLoading, pauseDebate, resumeDebate, nextRound, stopDebate]);
 
-  const handleStatementClick = (statement: Statement) => {
-    setSelectedStatement(statement);
-  };
+  
 
   // 滑動手勢處理
   const handleSwipeLeft = () => {
@@ -144,7 +142,10 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
         onTabChange={(tab) => setActiveTab(tab as typeof activeTab)}
         participantCount={room.participants.length}
         statementCount={statements.length}
-        onSettingsClick={() => setShowMobileSettings(true)}
+        onSettingsClick={() => {
+          // TODO: Implement mobile settings modal
+          console.log('Mobile settings clicked');
+        }}
       />
       {/* 頂部標題欄 - 響應式優化 */}
       <div className="bg-white shadow-sm border-b border-gray-200 container-responsive py-4">
@@ -287,7 +288,7 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
               debateStatus={debateStatus}
               currentRound={currentRound}
               loading={isLoading}
-              onStatementClick={handleStatementClick}
+              
             />
             </div>
           )}

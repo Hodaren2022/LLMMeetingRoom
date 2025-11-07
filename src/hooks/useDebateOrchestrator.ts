@@ -29,7 +29,7 @@ export const useDebateOrchestrator = () => {
     }
 
     orchestratorRef.current = new DebateOrchestrator({
-      onStateChange: (state, data) => {
+      onStateChange: (state, data?: unknown) => {
         console.log('Debate state changed:', state, data);
         
         switch (state) {
@@ -55,7 +55,7 @@ export const useDebateOrchestrator = () => {
           case DebateState.ERROR:
             setDebateStatus('error');
             setLoading(false);
-            setError(data?.error || '未知錯誤');
+            setError((data as { error?: string })?.error || '未知錯誤');
             break;
           case DebateState.INITIALIZING:
             setLoading(true);

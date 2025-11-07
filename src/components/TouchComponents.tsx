@@ -225,6 +225,7 @@ export interface TouchCardProps {
   onLongPress?: () => void;
   className?: string;
   enableHover?: boolean;
+  style?: React.CSSProperties;
 }
 
 export const TouchCard: React.FC<TouchCardProps> = ({
@@ -232,7 +233,8 @@ export const TouchCard: React.FC<TouchCardProps> = ({
   onClick,
   onLongPress,
   className = '',
-  enableHover = true
+  enableHover = true,
+  style
 }) => {
   const [isPressed, setIsPressed] = useState(false);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
@@ -279,6 +281,7 @@ export const TouchCard: React.FC<TouchCardProps> = ({
   return (
     <div
       className={baseClasses}
+      style={style}
       onClick={handleClick}
       onMouseDown={handlePressStart}
       onMouseUp={handlePressEnd}

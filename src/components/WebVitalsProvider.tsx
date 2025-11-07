@@ -20,7 +20,7 @@ export const WebVitalsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         analyticsEndpoint: process.env.NEXT_PUBLIC_ANALYTICS_ENDPOINT,
         thresholds: {
           LCP: 2500,
-          FID: 100,
+          INP: 200,
           CLS: 0.1,
           FCP: 1800,
           TTFB: 800
