@@ -34,49 +34,51 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+    <div className="layout-grid-simple min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <header className="grid-area-header">
+        <div className="content-area text-center">
+          <h1 className="fluid-heading-1 font-bold text-gray-900 fluid-space-md">
             虛擬會議室
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="fluid-body text-gray-600 max-w-2xl mx-auto">
             AI 驅動的智能辯論平台，讓不同角色的虛擬替身針對議題進行深度討論並達成共識
           </p>
-        </header>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-md p-6 text-center">
-            <Users className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-            <h3 className="text-lg font-semibold text-gray-900">6 個預設替身</h3>
-            <p className="text-gray-600">CEO、CTO、CFO 等專業角色</p>
-          </div>
-          <div className="bg-white rounded-lg shadow-md p-6 text-center">
-            <MessageSquare className="w-8 h-8 text-green-600 mx-auto mb-2" />
-            <h3 className="text-lg font-semibold text-gray-900">智能辯論</h3>
-            <p className="text-gray-600">基於 Chain of Thought 推理</p>
-          </div>
-          <div className="bg-white rounded-lg shadow-md p-6 text-center">
-            <Settings className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-            <h3 className="text-lg font-semibold text-gray-900">即時搜尋</h3>
-            <p className="text-gray-600">Google Search grounding 支援</p>
-          </div>
         </div>
+      </header>
 
-        {/* Meeting Rooms */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">會議室</h2>
-            <button
-              onClick={handleCreateRoom}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              創建會議室
-            </button>
+      <main className="grid-area-main">
+        <div className="content-area">
+          {/* Quick Stats */}
+          <div className="card-grid-responsive">
+            <div className="bg-white rounded-lg shadow-md fluid-padding-lg text-center">
+              <Users className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+              <h3 className="fluid-heading-3 font-semibold text-gray-900">6 個預設替身</h3>
+              <p className="fluid-small text-gray-600">CEO、CTO、CFO 等專業角色</p>
+            </div>
+            <div className="bg-white rounded-lg shadow-md fluid-padding-lg text-center">
+              <MessageSquare className="w-8 h-8 text-green-600 mx-auto mb-2" />
+              <h3 className="fluid-heading-3 font-semibold text-gray-900">智能辯論</h3>
+              <p className="fluid-small text-gray-600">基於 Chain of Thought 推理</p>
+            </div>
+            <div className="bg-white rounded-lg shadow-md fluid-padding-lg text-center">
+              <Settings className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+              <h3 className="fluid-heading-3 font-semibold text-gray-900">即時搜尋</h3>
+              <p className="fluid-small text-gray-600">Google Search grounding 支援</p>
+            </div>
           </div>
+
+          {/* Meeting Rooms */}
+          <div className="bg-white rounded-lg shadow-md fluid-padding-lg">
+            <div className="flex-between fluid-space-md">
+              <h2 className="fluid-heading-2 font-bold text-gray-900">會議室</h2>
+              <button
+                onClick={handleCreateRoom}
+                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                創建會議室
+              </button>
+            </div>
 
           {rooms.length === 0 ? (
             <div className="text-center py-12">
@@ -95,7 +97,7 @@ export default function Home() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="card-grid-responsive">
               {rooms.map((room) => (
                 <div
                   key={room.id}
@@ -128,13 +130,15 @@ export default function Home() {
               ))}
             </div>
           )}
+          </div>
         </div>
+      </main>
 
-        {/* Footer */}
-        <footer className="text-center mt-12 text-gray-600">
-          <p>© 2024 Virtual Meeting Room. Powered by Gemini AI.</p>
-        </footer>
-      </div>
+      <footer className="grid-area-footer">
+        <div className="content-area text-center">
+          <p className="fluid-small text-gray-600">© 2024 Virtual Meeting Room. Powered by Gemini AI.</p>
+        </div>
+      </footer>
     </div>
   );
 }

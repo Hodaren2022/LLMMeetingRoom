@@ -18,10 +18,16 @@ export const EditableTopicHeader: React.FC<EditableTopicHeaderProps> = ({
   const [editValue, setEditValue] = useState(topic);
   const [showGeneratedBadge, setShowGeneratedBadge] = useState(isGenerated);
 
+  // 使用 useEffect 來同步外部 props 變化
   useEffect(() => {
-    setEditValue(topic);
+    if (!isEditing) {
+      setEditValue(topic);
+    }
+  }, [topic, isEditing]);
+
+  useEffect(() => {
     setShowGeneratedBadge(isGenerated);
-  }, [topic, isGenerated]);
+  }, [isGenerated]);
 
   const handleSave = () => {
     if (editValue.trim() && editValue !== topic) {

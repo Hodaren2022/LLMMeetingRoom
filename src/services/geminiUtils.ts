@@ -1,4 +1,4 @@
-import { GeminiResponse, SourceReference } from '@/types';
+import { SourceReference } from '@/types';
 
 /**
  * 來源引用處理工具
@@ -7,7 +7,7 @@ export class SourceProcessor {
   /**
    * 處理 Gemini 回應中的來源引用
    */
-  static processGroundingMetadata(response: any): SourceReference[] {
+  static processGroundingMetadata(response: unknown): SourceReference[] {
     const sources: SourceReference[] = [];
     
     try {
@@ -17,7 +17,7 @@ export class SourceProcessor {
       }
 
       const chunks = groundingMetadata.groundingChunks;
-      chunks.forEach((chunk: any, index: number) => {
+      chunks.forEach((chunk: unknown, index: number) => {
         if (chunk.web) {
           sources.push({
             url: chunk.web.uri,
@@ -41,7 +41,7 @@ export class SourceProcessor {
   /**
    * 為文本添加內聯引用
    */
-  static addInlineCitations(text: string, groundingMetadata: any): string {
+  static addInlineCitations(text: string, groundingMetadata: unknown): string {
     try {
       if (!groundingMetadata?.groundingSupports || !groundingMetadata?.groundingChunks) {
         return text;
@@ -90,7 +90,7 @@ export class SourceProcessor {
   /**
    * 提取搜尋查詢
    */
-  static extractSearchQueries(groundingMetadata: any): string[] {
+  static extractSearchQueries(groundingMetadata: unknown): string[] {
     try {
       return groundingMetadata?.webSearchQueries || [];
     } catch (error) {
@@ -270,13 +270,13 @@ export class GeminiErrorHandler {
  * 快取管理
  */
 export class GeminiCache {
-  private static cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+  private static cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>();
   private static readonly DEFAULT_TTL = 5 * 60 * 1000; // 5 分鐘
 
   /**
    * 設定快取
    */
-  static set(key: string, data: any, ttl: number = this.DEFAULT_TTL): void {
+  static set(key: string, data: unknown, ttl: number = this.DEFAULT_TTL): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -324,7 +324,7 @@ export class GeminiCache {
   /**
    * 生成快取鍵
    */
-  static generateKey(prefix: string, ...params: any[]): string {
+  static generateKey(prefix: string, ...params: unknown[]): string {
     return `${prefix}:${params.map(p => JSON.stringify(p)).join(':')}`;
   }
 }

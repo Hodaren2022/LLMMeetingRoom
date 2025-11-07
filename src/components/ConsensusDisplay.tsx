@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ConsensusData, Statement } from '@/types';
-import { VotingSession, VotingResult, ConsensusManager } from '@/services/consensusManager';
+import { VotingSession } from '@/services/consensusManager';
 
 interface ConsensusDisplayProps {
   consensusData?: ConsensusData;
@@ -12,16 +12,12 @@ interface ConsensusDisplayProps {
 export const ConsensusDisplay: React.FC<ConsensusDisplayProps> = ({
   consensusData,
   statements,
-  onVotingComplete,
+  
   className = '',
 }) => {
-  const [consensusManager] = useState(() => new ConsensusManager({
-    onConsensusReached: (session, consensus) => {
-      onVotingComplete?.(session);
-    }
-  }));
   
-  const [votingSession, setVotingSession] = useState<VotingSession | null>(null);
+  
+  
   const [showDetails, setShowDetails] = useState(false);
 
   // 計算實時共識數據
@@ -39,7 +35,7 @@ export const ConsensusDisplay: React.FC<ConsensusDisplayProps> = ({
     const consensusReached = supportRate > threshold || opposeRate > threshold;
 
     const finalScores: Record<string, number> = {};
-    statements.forEach((statement, index) => {
+    statements.forEach((statement) => {
       finalScores[statement.personaId] = statement.tendencyScore;
     });
 

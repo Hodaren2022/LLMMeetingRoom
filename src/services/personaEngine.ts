@@ -1,4 +1,4 @@
-import { Persona, DebateContext, Statement, SourceReference } from '@/types';
+import { Persona, DebateContext, SourceReference } from '@/types';
 
 /**
  * 替身人格引擎 - 負責管理和執行虛擬替身的人格特質

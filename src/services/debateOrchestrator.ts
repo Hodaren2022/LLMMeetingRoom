@@ -1,6 +1,6 @@
 import { Persona, DebateContext, Statement, SourceReference, ConsensusData, MeetingRoom } from '@/types';
 import { ApiService } from './apiService';
-import { PersonaEngine } from './personaEngine';
+
 import { calculateConsensus } from '@/utils';
 
 /**
@@ -23,7 +23,7 @@ export enum DebateState {
 export interface DebateEvent {
   type: string;
   timestamp: number;
-  data?: any;
+  data?: unknown;
 }
 
 /**
@@ -41,21 +41,21 @@ export class DebateOrchestrator {
   private startTime: number | null = null;
   
   // 事件回調
-  private onStateChange?: (state: DebateState, data?: any) => void;
+  private onStateChange?: (state: DebateState, data?: unknown) => void;
   private onStatementAdded?: (statement: Statement) => void;
   private onConsensusUpdate?: (consensus: ConsensusData) => void;
   private onError?: (error: string) => void;
-  private onRoundComplete?: (round: number, roundData: any) => void;
-  private onDebateComplete?: (result: any) => void;
+  private onRoundComplete?: (round: number, roundData: unknown) => void;
+  private onDebateComplete?: (result: unknown) => void;
   private onProgress?: (progress: { current: number; total: number; percentage: number }) => void;
 
   constructor(options?: {
-    onStateChange?: (state: DebateState, data?: any) => void;
+    onStateChange?: (state: DebateState, data?: unknown) => void;
     onStatementAdded?: (statement: Statement) => void;
     onConsensusUpdate?: (consensus: ConsensusData) => void;
     onError?: (error: string) => void;
-    onRoundComplete?: (round: number, roundData: any) => void;
-    onDebateComplete?: (result: any) => void;
+    onRoundComplete?: (round: number, roundData: unknown) => void;
+    onDebateComplete?: (result: unknown) => void;
     onProgress?: (progress: { current: number; total: number; percentage: number }) => void;
   }) {
     if (options) {
@@ -115,8 +115,15 @@ export class DebateOrchestrator {
       throw new Error('共識門檻必須在 0.5-1 之間');
     }
     
+    // 自動修正超時時間而非拋出錯誤
     if (room.settings.timeoutPerRound && room.settings.timeoutPerRound < 30000) {
-      throw new Error('每回合超時時間不能少於 30 秒');
+      console.warn(`超時時間 ${room.settings.timeoutPerRound}ms 少於最小值，已自動調整為 30 秒`);
+      room.settings.timeoutPerRound = 30000;
+    }
+    
+    // 確保有默認超時時間
+    if (!room.settings.timeoutPerRound) {
+      room.settings.timeoutPerRound = 300000; // 5分鐘默認值
     }
   }
 
@@ -450,7 +457,7 @@ export class DebateOrchestrator {
   /**
    * 計算最終結果
    */
-  private calculateFinalResult(): any {
+  private calculateFinalResult(): unknown {
     const consensus = this.calculateCurrentConsensus();
     this.onConsensusUpdate?.(consensus);
     
@@ -497,7 +504,7 @@ export class DebateOrchestrator {
   /**
    * 添加事件到歷史記錄
    */
-  private addEvent(type: string, data?: any): void {
+  private addEvent(type: string, data?: unknown): void {
     const event: DebateEvent = {
       type,
       timestamp: Date.now(),
@@ -543,7 +550,7 @@ export class DebateOrchestrator {
   /**
    * 處理錯誤
    */
-  private handleError(message: string, error: any): void {
+  private handleError(message: string, error: unknown): void {
     console.error(message, error);
     this.setState(DebateState.ERROR);
     this.addEvent('error', { 

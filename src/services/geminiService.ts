@@ -33,7 +33,7 @@ class GeminiService {
   /**
    * 解析 Gemini 回應
    */
-  private parseGeminiResponse(response: any): GeminiResponse {
+  private parseGeminiResponse(response: unknown): GeminiResponse {
     try {
       const content = response.response?.text() || '';
       

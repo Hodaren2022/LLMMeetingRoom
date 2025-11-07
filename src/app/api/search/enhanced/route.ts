@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getGeminiService } from '@/services/geminiService';
+import { Persona } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
           keywords,
           results: searchResults,
           timestamp: Date.now(),
-          personaFocus: personas.flatMap((p: any) => p.ragFocus),
+          personaFocus: personas.flatMap((p: Persona) => p.ragFocus),
           success: true,
         });
       }

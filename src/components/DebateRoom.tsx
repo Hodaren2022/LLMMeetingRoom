@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { MeetingRoom, Persona, DebateStatus, Statement, ConsensusData } from '@/types';
+import { MeetingRoom, Persona, Statement } from '@/types';
 import { useDebateControl } from '@/hooks/useDebateOrchestrator';
+import { useSwipe } from '../hooks/useSwipe';
 import { useMeetingRoomStore } from '@/stores';
 import { DebateViewer } from './DebateViewer';
 import { DebateControlPanel } from './DebateControlPanel';
@@ -9,20 +10,24 @@ import { PersonaManager } from './PersonaManager';
 import { PersonaSelectionPanel } from './PersonaSelectionPanel';
 import { ModeratorSelectionPanel } from './ModeratorSelectionPanel';
 import { EditableTopicHeader } from './EditableTopicHeader';
+import { MobileNavigation } from './MobileNavigation';
 
 interface DebateRoomProps {
   room: MeetingRoom;
   onRoomUpdate?: (room: MeetingRoom) => void;
-  onDebateComplete?: (result: any) => void;
+  onDebateComplete?: (result: unknown) => void;
 }
 
 export const DebateRoom: React.FC<DebateRoomProps> = ({
   room,
   onRoomUpdate,
-  onDebateComplete,
+  
 }) => {
   const [activeTab, setActiveTab] = useState<'debate' | 'consensus' | 'participants' | 'selection'>('debate');
-  const [selectedStatement, setSelectedStatement] = useState<Statement | null>(null);
+  
+  
+  const tabs = ['selection', 'debate', 'consensus', 'participants'] as const;
+  const currentTabIndex = tabs.indexOf(activeTab);
 
   const {
     debateStatus,
@@ -90,6 +95,28 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
     setSelectedStatement(statement);
   };
 
+  // 滑動手勢處理
+  const handleSwipeLeft = () => {
+    if (currentTabIndex < tabs.length - 1) {
+      setActiveTab(tabs[currentTabIndex + 1]);
+    }
+  };
+
+  const handleSwipeRight = () => {
+    if (currentTabIndex > 0) {
+      setActiveTab(tabs[currentTabIndex - 1]);
+    }
+  };
+
+  // 使用滑動手勢 hook
+  useSwipe({
+    onSwipeLeft: handleSwipeLeft,
+    onSwipeRight: handleSwipeRight,
+  }, {
+    threshold: 50,
+    preventDefaultTouchmoveEvent: false,
+  });
+
   const getTabIcon = (tab: string) => {
     switch (tab) {
       case 'selection': return '🎭';
@@ -110,12 +137,20 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100">
-      {/* 頂部標題欄 */}
-      <div className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+    <div className="full-height-mobile flex flex-col bg-gray-100 safe-area-mobile">
+      {/* 移動端導航組件 */}
+      <MobileNavigation
+        currentTab={activeTab}
+        onTabChange={(tab) => setActiveTab(tab as typeof activeTab)}
+        participantCount={room.participants.length}
+        statementCount={statements.length}
+        onSettingsClick={() => setShowMobileSettings(true)}
+      />
+      {/* 頂部標題欄 - 響應式優化 */}
+      <div className="bg-white shadow-sm border-b border-gray-200 container-responsive py-4">
         <div className="flex items-center justify-between">
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-semibold text-gray-900 mb-2">{room.name}</h1>
+            <h1 className="text-lg tablet:text-xl font-semibold text-gray-900 mb-2 prevent-overflow">{room.name}</h1>
             <EditableTopicHeader
               topic={room.topic}
               isGenerated={room.isTopicGenerated}
@@ -130,7 +165,7 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
             />
           </div>
           
-          <div className="flex items-center space-x-4 flex-shrink-0">
+          <div className="hidden laptop:flex items-center space-x-4 flex-shrink-0">
             {error && (
               <div className="flex items-center text-red-600 text-sm">
                 <span className="mr-2">⚠️</span>
@@ -142,35 +177,48 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
               創建時間: <span className="font-medium">{new Date(room.createdAt).toLocaleDateString()}</span>
             </div>
           </div>
+          
+          {/* 移動端錯誤顯示 */}
+          {error && (
+            <div className="laptop:hidden flex items-center text-red-600 text-xs">
+              <span className="mr-1">⚠️</span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* 標籤導航 */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="px-6">
-          <nav className="flex space-x-8">
+      {/* 標籤導航 - 響應式優化 */}
+      <div className="bg-white border-b border-gray-200 nav-desktop">
+        <div className="container-responsive">
+          <nav className="flex space-x-4 tablet:space-x-8 overflow-x-auto">
             {(['selection', 'debate', 'consensus', 'participants'] as const).map((tab) => {
               const count = getTabCount(tab);
               return (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
+                  className={`btn-touch py-3 tablet:py-4 px-2 tablet:px-3 border-b-2 font-medium text-xs tablet:text-sm transition-colors whitespace-nowrap ${
                     activeTab === tab
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  <span className="flex items-center space-x-2">
-                    <span>{getTabIcon(tab)}</span>
-                    <span>
+                  <span className="flex items-center space-x-1 tablet:space-x-2">
+                    <span className="text-sm tablet:text-base">{getTabIcon(tab)}</span>
+                    <span className="hidden tablet:inline">
                       {tab === 'selection' && '人格選擇'}
                       {tab === 'debate' && '辯論過程'}
                       {tab === 'consensus' && '共識分析'}
                       {tab === 'participants' && '參與者'}
                     </span>
+                    <span className="tablet:hidden text-xs">
+                      {tab === 'selection' && '選擇'}
+                      {tab === 'debate' && '辯論'}
+                      {tab === 'consensus' && '共識'}
+                      {tab === 'participants' && '參與'}
+                    </span>
                     {count !== null && (
-                      <span className={`px-2 py-1 rounded-full text-xs ${
+                      <span className={`px-1 tablet:px-2 py-0.5 tablet:py-1 rounded-full text-xs ${
                         activeTab === tab
                           ? 'bg-blue-100 text-blue-600'
                           : 'bg-gray-100 text-gray-600'
@@ -186,14 +234,14 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
         </div>
       </div>
 
-      {/* 主要內容區域 */}
+      {/* 主要內容區域 - 響應式布局 */}
       <div className="flex-1 flex overflow-hidden">
-        {/* 左側主要內容 */}
-        <div className="flex-1 flex flex-col">
+        {/* 主要內容 - 移動端全屏，平板端和桌面端左側 */}
+        <div className="flex-1 flex flex-col tablet:w-auto laptop:flex-1">
           {activeTab === 'selection' && (
             <div className="flex-1 flex flex-col overflow-hidden">
-              <div className="flex-1 p-4 sm:p-6 overflow-hidden">
-                <div className="h-full flex flex-col space-y-6">
+              <div className="flex-1 container-responsive py-4 overflow-hidden">
+                <div className="h-full flex flex-col spacing-responsive">
                 {/* 主持人選擇區域 */}
                 <ModeratorSelectionPanel
                   availablePersonas={useMeetingRoomStore.getState().availablePersonas}
@@ -232,7 +280,7 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
           )}
 
           {activeTab === 'debate' && (
-            <div className="flex-1 p-6">
+            <div className="flex-1 container-responsive py-4">
               <DebateViewer
               statements={statements}
               currentSpeaker={currentSpeakerPersona}
@@ -245,7 +293,7 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
           )}
 
           {activeTab === 'consensus' && (
-            <div className="flex-1 p-6">
+            <div className="flex-1 container-responsive py-4">
               <ConsensusDisplay
                 consensusData={consensusData}
                 statements={statements}
@@ -255,7 +303,7 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
           )}
 
           {activeTab === 'participants' && (
-            <div className="flex-1 p-6">
+            <div className="flex-1 container-responsive py-4">
               <PersonaManager
                 personas={room.participants}
                 onPersonasChange={(personas) => {
@@ -268,8 +316,8 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
           )}
         </div>
 
-        {/* 右側控制面板 */}
-        <div className="w-80 border-l border-gray-200 bg-gray-50 p-6">
+        {/* 右側控制面板 - 桌面端顯示，移動端隱藏 */}
+        <div className="hidden laptop:block w-80 border-l border-gray-200 bg-gray-50 p-6">
           <DebateControlPanel
             debateStatus={debateStatus}
             currentRound={currentRound}
@@ -343,6 +391,84 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
           )}
         </div>
       </div>
+
+      {/* 移動端底部導航 */}
+      <div className="nav-mobile">
+        <div className="flex justify-around items-center">
+          {(['selection', 'debate', 'consensus', 'participants'] as const).map((tab) => {
+            const count = getTabCount(tab);
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`btn-touch flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors relative ${
+                  activeTab === tab
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <span className="text-lg mb-1">{getTabIcon(tab)}</span>
+                <span className="text-xs font-medium">
+                  {tab === 'selection' && '選擇'}
+                  {tab === 'debate' && '辯論'}
+                  {tab === 'consensus' && '共識'}
+                  {tab === 'participants' && '參與'}
+                </span>
+                {count !== null && count > 0 && (
+                  <span className={`absolute -top-1 -right-1 px-1 py-0.5 rounded-full text-xs ${
+                    activeTab === tab
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-400 text-white'
+                  }`}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        
+        {/* 滑動指示器 */}
+        <div className="flex justify-center mt-1">
+          <div className="flex space-x-1">
+            {tabs.map((_, index) => (
+              <div
+                key={index}
+                className={`w-1 h-1 rounded-full transition-colors ${
+                  index === currentTabIndex ? 'bg-blue-500' : 'bg-gray-300'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 浮動操作按鈕 - 移動端和平板端顯示 */}
+      {(debateStatus === 'idle' || debateStatus === 'paused') && room.participants.length >= 2 && (
+        <button
+          onClick={() => {
+            if (debateStatus === 'idle') {
+              startDebate();
+            } else if (debateStatus === 'paused') {
+              resumeDebate();
+            }
+          }}
+          className="fab laptop:hidden"
+          disabled={isLoading}
+        >
+          {debateStatus === 'idle' ? '▶️' : '▶️'}
+        </button>
+      )}
+
+      {debateStatus === 'debating' && (
+        <button
+          onClick={pauseDebate}
+          className="fab laptop:hidden"
+          disabled={isLoading}
+        >
+          ⏸️
+        </button>
+      )}
     </div>
   );
 };

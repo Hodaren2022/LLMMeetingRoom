@@ -174,14 +174,14 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
           settings: {
             maxRounds: 5,
             consensusThreshold: 0.7,
-            timeoutPerRound: 300,
+            timeoutPerRound: 300000, // 5分鐘，確保不少於30秒
             allowUserIntervention: true,
             autoSaveInterval: 30,
           },
         };
         
-        set((state) => ({
-          rooms: [...state.rooms, newRoom],
+        set((currentState) => ({
+          rooms: [...currentState.rooms, newRoom],
           currentRoom: newRoom,
         }));
         
@@ -196,7 +196,7 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
       },
 
       updateRoom: (roomId: string, updates: Partial<MeetingRoom>) => {
-        set((state) => ({
+        set(() => ({
           rooms: state.rooms.map(room =>
             room.id === roomId
               ? { ...room, ...updates, updatedAt: Date.now() }
@@ -209,7 +209,7 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
       },
 
       deleteRoom: (roomId: string) => {
-        set((state) => ({
+        set(() => ({
           rooms: state.rooms.filter(room => room.id !== roomId),
           currentRoom: state.currentRoom?.id === roomId ? null : state.currentRoom,
         }));
@@ -242,8 +242,8 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
       },
 
       togglePersonaActive: (personaId: string) => {
-        set((state) => {
-          const updatedPersonas = state.availablePersonas.map(persona =>
+        set((currentState) => {
+          const updatedPersonas = currentState.availablePersonas.map(persona =>
             persona.id === personaId ? { ...persona, isActive: !persona.isActive } : persona
           );
           
@@ -251,8 +251,8 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
           
           return {
             availablePersonas: updatedPersonas,
-            currentRoom: state.currentRoom ? {
-              ...state.currentRoom,
+            currentRoom: currentState.currentRoom ? {
+              ...currentState.currentRoom,
               participants: activePersonas,
               updatedAt: Date.now(),
             } : null,
@@ -262,7 +262,7 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
 
       // 辯論控制
       startDebate: (initialTopic?: string) => {
-        set((state) => ({
+        set(() => ({
           debateStatus: 'preparing',
           currentRound: 1,
           error: null,
@@ -413,6 +413,28 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
     }),
     {
       name: 'meeting-room-storage',
+      version: 1,
+      migrate: (persistedState: unknown, version: number) => {
+        if (version === 0) {
+          // 從版本0遷移到版本1
+          return {
+            ...persistedState,
+            // 確保設置中的超時時間至少30秒
+            rooms: (persistedState as { rooms?: unknown[] })?.rooms?.map((room: unknown) => ({
+              ...room,
+              settings: {
+                maxRounds: 5,
+                consensusThreshold: 0.7,
+                timeoutPerRound: Math.max(30000, room.settings?.timeoutPerRound || 300000), // 至少30秒
+                allowUserIntervention: true,
+                autoSaveInterval: 30,
+                ...room.settings
+              }
+            })) || []
+          };
+        }
+        return persistedState;
+      },
       partialize: (state) => ({
         rooms: state.rooms,
         availablePersonas: state.availablePersonas,

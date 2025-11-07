@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { WebVitalsProvider } from "@/components/WebVitalsProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,7 +18,9 @@ export default function RootLayout({
   return (
     <html lang="zh-TW">
       <body className={`${inter.className} antialiased`}>
-        {children}
+        <WebVitalsProvider>
+          {children}
+        </WebVitalsProvider>
       </body>
     </html>
   );

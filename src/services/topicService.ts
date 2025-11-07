@@ -1,4 +1,4 @@
-import { GeminiResponse } from '@/types';
+
 
 interface TopicGenerationRequest {
   firstStatement: string;

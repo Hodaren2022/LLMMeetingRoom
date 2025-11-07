@@ -6,7 +6,12 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:responsive": "playwright test tests/responsive.spec.ts",
+    "test:touch": "playwright test tests/touch-interactions.spec.ts",
+    "test:report": "playwright show-report"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -15,9 +20,11 @@
     "next": "16.0.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "web-vitals": "^5.1.0",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

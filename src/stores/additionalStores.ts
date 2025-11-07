@@ -33,10 +33,10 @@ interface DebateHistoryState {
   };
   
   // Actions
-  addDebateRecord: (record: any) => void;
-  getDebatesByTopic: (topic: string) => any[];
-  getDebatesByPersona: (personaId: string) => any[];
-  getAnalytics: () => any;
+  addDebateRecord: (record: unknown) => void;
+  getDebatesByTopic: (topic: string) => unknown[];
+  getDebatesByPersona: (personaId: string) => unknown[];
+  getAnalytics: () => Record<string, unknown>;
   clearHistory: () => void;
   exportHistory: () => string;
   importHistory: (data: string) => boolean;
@@ -126,7 +126,7 @@ export const useDebateHistoryStore = create<DebateHistoryState>()(
 /**
  * 計算分析數據
  */
-function calculateAnalytics(history: any[]) {
+function calculateAnalytics(history: unknown[]) {
   const totalDebates = history.length;
   
   if (totalDebates === 0) {
@@ -194,7 +194,7 @@ interface NotificationState {
   }>;
   
   // Actions
-  addNotification: (notification: any) => void;
+  addNotification: (notification: unknown) => void;
   markAsRead: (id: string) => void;
   removeNotification: (id: string) => void;
   clearAll: () => void;
@@ -255,4 +255,6 @@ export const useNotificationStore = create<NotificationState>()(
   )
 );
 
-export default { useDebateHistoryStore, useNotificationStore };
+const additionalStoresExports = { useDebateHistoryStore, useNotificationStore };
+
+export default additionalStoresExports;

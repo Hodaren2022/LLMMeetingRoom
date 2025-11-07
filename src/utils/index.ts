@@ -195,7 +195,7 @@ export const consensusUtils: {
    */
   calculateDynamicConsensus: (
     historicalScores: number[][], 
-    timeWeights: number[] = []
+    // _timeWeights: number[] = []
   ): {
     trendDirection: 'converging' | 'diverging' | 'stable';
     convergenceRate: number;
@@ -322,30 +322,38 @@ export const calculateConsensus = consensusUtils.calculateBasicConsensus;
 /**
  * 驗證替身配置
  */
-export const validatePersona = (persona: any): string[] => {
+export const validatePersona = (persona: unknown): string[] => {
   const errors: string[] = [];
   
-  if (!persona.name || persona.name.trim().length === 0) {
+  // Type guard to check if persona is an object
+  if (!persona || typeof persona !== 'object') {
+    errors.push('替身數據格式無效');
+    return errors;
+  }
+  
+  const p = persona as Record<string, unknown>;
+  
+  if (!p.name || typeof p.name !== 'string' || p.name.trim().length === 0) {
     errors.push('替身名稱不能為空');
   }
   
-  if (!persona.identity || persona.identity.trim().length === 0) {
+  if (!p.identity || typeof p.identity !== 'string' || p.identity.trim().length === 0) {
     errors.push('身份描述不能為空');
   }
   
-  if (!persona.primeDirective || persona.primeDirective.trim().length === 0) {
+  if (!p.primeDirective || typeof p.primeDirective !== 'string' || p.primeDirective.trim().length === 0) {
     errors.push('核心原則不能為空');
   }
   
-  if (!persona.toneStyle || persona.toneStyle.trim().length === 0) {
+  if (!p.toneStyle || typeof p.toneStyle !== 'string' || p.toneStyle.trim().length === 0) {
     errors.push('辯論風格不能為空');
   }
   
-  if (typeof persona.temperature !== 'number' || persona.temperature < 0.1 || persona.temperature > 1.0) {
+  if (typeof p.temperature !== 'number' || p.temperature < 0.1 || p.temperature > 1.0) {
     errors.push('溫度參數必須在 0.1 到 1.0 之間');
   }
   
-  if (!Array.isArray(persona.ragFocus) || persona.ragFocus.length === 0) {
+  if (!Array.isArray(p.ragFocus) || p.ragFocus.length === 0) {
     errors.push('搜尋重點至少需要一個項目');
   }
   
@@ -374,7 +382,7 @@ export const deepClone = <T>(obj: T): T => {
 /**
  * 防抖函數
  */
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {
@@ -389,7 +397,7 @@ export const debounce = <T extends (...args: any[]) => any>(
 /**
  * 節流函數
  */
-export const throttle = <T extends (...args: any[]) => any>(
+export const throttle = <T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): ((...args: Parameters<T>) => void) => {
@@ -418,7 +426,7 @@ export const storage = {
     }
   },
   
-  set: (key: string, value: any): boolean => {
+  set: (key: string, value: unknown): boolean => {
     try {
       localStorage.setItem(key, JSON.stringify(value));
       return true;
@@ -644,7 +652,7 @@ export const validationUtils = {
   /**
    * 驗證非空字串
    */
-  isNonEmptyString: (value: any): boolean => {
+  isNonEmptyString: (value: unknown): boolean => {
     return typeof value === 'string' && value.trim().length > 0;
   },
   
@@ -655,3 +663,9 @@ export const validationUtils = {
     return typeof value === 'number' && value >= min && value <= max;
   },
 };
+
+// 導出流體排版工具
+export { FluidTypographyCalculator, fluidTypographyUtils, defaultFluidTypographyConfigs } from './fluidTypography';
+
+// 導出 Web Vitals 監控工具
+export { WebVitalsMonitor, initWebVitalsMonitoring, getWebVitalsMonitor } from './webVitalsMonitor';

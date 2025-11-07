@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { DebateOrchestrator, DebateState } from '@/services/debateOrchestrator';
-import { MeetingRoom, Statement, ConsensusData, DebateStatus } from '@/types';
+import { MeetingRoom, Statement, ConsensusData } from '@/types';
 import { useMeetingRoomStore } from '@/stores';
 
 /**
@@ -86,12 +86,12 @@ export const useDebateOrchestrator = () => {
         setLoading(false);
       },
       
-      onRoundComplete: (round: number, roundData: any) => {
+      onRoundComplete: (round: number, roundData: unknown) => {
         nextRound();
         console.log(`Round ${round} completed`, roundData);
       },
       
-      onDebateComplete: (result: any) => {
+      onDebateComplete: (result: unknown) => {
         console.log('Debate completed:', result);
         setCurrentSpeaker(null);
       },
@@ -99,6 +99,7 @@ export const useDebateOrchestrator = () => {
 
     setIsInitialized(true);
   }, [
+    currentRoom,
     setDebateStatus,
     setCurrentSpeaker,
     addStatement,
@@ -211,7 +212,9 @@ export const useDebateOrchestrator = () => {
   return {
     // 狀態
     isInitialized,
-    orchestratorState: getOrchestratorState(),
+    get orchestratorState() {
+      return orchestratorRef.current?.getState() || null;
+    },
     
     // 方法
     initializeOrchestrator,
@@ -300,4 +303,6 @@ export const useDebateControl = () => {
   };
 };
 
-export default { useDebateOrchestrator, useDebateControl };
+const debateOrchestratorExports = { useDebateOrchestrator, useDebateControl };
+
+export default debateOrchestratorExports;

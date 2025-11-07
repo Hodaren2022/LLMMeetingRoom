@@ -209,8 +209,8 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
             isTopicGenerated: false, // 初始為 false，當 AI 生成主題時設為 true
           };
           
-          set((state) => ({
-            rooms: [...state.rooms, newRoom],
+          set((currentState) => ({
+            rooms: [...currentState.rooms, newRoom],
             currentRoom: newRoom,
           }));
           
@@ -230,22 +230,22 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
         },
 
         updateRoom: (roomId: string, updates: Partial<MeetingRoom>) => {
-          set((state) => ({
-            rooms: state.rooms.map(room =>
+          set((currentState) => ({
+            rooms: currentState.rooms.map(room =>
               room.id === roomId
                 ? { ...room, ...updates, updatedAt: Date.now() }
                 : room
             ),
-            currentRoom: state.currentRoom?.id === roomId
-              ? { ...state.currentRoom, ...updates, updatedAt: Date.now() }
-              : state.currentRoom,
+            currentRoom: currentState.currentRoom?.id === roomId
+              ? { ...currentState.currentRoom, ...updates, updatedAt: Date.now() }
+              : currentState.currentRoom,
           }));
         },
 
         deleteRoom: (roomId: string) => {
-          set((state) => ({
-            rooms: state.rooms.filter(room => room.id !== roomId),
-            currentRoom: state.currentRoom?.id === roomId ? null : state.currentRoom,
+          set((currentState) => ({
+            rooms: currentState.rooms.filter(room => room.id !== roomId),
+            currentRoom: currentState.currentRoom?.id === roomId ? null : currentState.currentRoom,
           }));
         },
 
@@ -257,7 +257,7 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
             color: persona.color || PersonaEngine.suggestPersonaColor(persona as Persona),
           };
           
-          set((state) => ({
+          set(() => ({
             availablePersonas: [...state.availablePersonas, newPersona],
           }));
         },
@@ -317,7 +317,7 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
 
         // 辯論控制
         startDebate: () => {
-          set((state) => ({
+          set(() => ({
             debateStatus: 'preparing',
             currentRound: 1,
             error: null,
@@ -580,7 +580,7 @@ export const useMeetingRoomStore = create<MeetingRoomState>()(
           userPreferences: state.userPreferences,
         }),
         version: 1,
-        migrate: (persistedState: any, version: number) => {
+        migrate: (persistedState: unknown, version: number) => {
           // 確保 persistedState 存在
           if (!persistedState) {
             return {

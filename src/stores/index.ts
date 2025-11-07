@@ -169,7 +169,7 @@ export const useUnreadNotifications = () => {
   return useNotificationStore((state) => state.notifications.filter(n => !n.read));
 };
 
-export default {
+const storeExports = {
   useMeetingRoomStore,
   useDebateHistoryStore,
   useNotificationStore,
@@ -185,3 +185,5 @@ export default {
   useError,
   useUnreadNotifications,
 };
+
+export default storeExports;

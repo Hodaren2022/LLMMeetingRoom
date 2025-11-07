@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Persona } from '@/types';
 import { X, Save, Plus, Minus, Palette } from 'lucide-react';
-import { validatePersona, colorUtils } from '@/utils';
+import { validatePersona } from '@/utils';
 
 interface PersonaEditorProps {
   persona?: Persona;
@@ -39,9 +39,10 @@ export const PersonaEditor: React.FC<PersonaEditorProps> = ({
 
   const [errors, setErrors] = useState<string[]>([]);
 
-  useEffect(() => {
+  // 初始化表單數據
+  const initializeFormData = React.useCallback(() => {
     if (persona) {
-      setFormData({
+      return {
         name: persona.name,
         role: persona.role,
         identity: persona.identity || '',
@@ -54,10 +55,9 @@ export const PersonaEditor: React.FC<PersonaEditorProps> = ({
         color: persona.color || '#6b7280',
         avatar: persona.avatar || '',
         isActive: persona.isActive || false,
-      });
+      };
     } else {
-      // 重置為預設值
-      setFormData({
+      return {
         name: '',
         role: '',
         identity: '',
@@ -70,12 +70,23 @@ export const PersonaEditor: React.FC<PersonaEditorProps> = ({
         color: '#6b7280',
         avatar: '',
         isActive: false,
-      });
+      };
     }
-    setErrors([]);
-  }, [persona, isOpen]);
+  }, [persona]);
 
-  const handleInputChange = (field: string, value: any) => {
+  // 當對話框打開時重置表單
+  useEffect(() => {
+    if (isOpen) {
+      const newFormData = initializeFormData();
+      // 使用 setTimeout 避免同步 setState
+      setTimeout(() => {
+        setFormData(newFormData);
+        setErrors([]);
+      }, 0);
+    }
+  }, [isOpen, initializeFormData]);
+
+  const handleInputChange = (field: string, value: unknown) => {
     setFormData(prev => ({
       ...prev,
       [field]: value,

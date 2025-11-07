@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Persona } from '@/types';
-import { Crown, Users, Sparkles, Check } from 'lucide-react';
+import { Crown, Users, Check } from 'lucide-react';
 
 interface ModeratorCardProps {
   persona: Persona;
