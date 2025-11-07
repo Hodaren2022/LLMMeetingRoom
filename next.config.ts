@@ -5,20 +5,29 @@ const nextConfig: NextConfig = {
     // 支持的圖片格式
     formats: ['image/webp', 'image/avif'],
     
-    // 允許的圖片域名
-    domains: [
-      'localhost',
-      'example.com',
-      'images.unsplash.com',
-      'via.placeholder.com'
+    // 允許的圖片域名 (使用新的 remotePatterns 配置)
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: 'example.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+      },
     ],
     
     // 圖片尺寸配置
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    
-    // 圖片質量設置
-    quality: 75,
     
     // 啟用圖片優化
     unoptimized: false,
@@ -40,9 +49,6 @@ const nextConfig: NextConfig = {
   experimental: {
     // 啟用 App Router 優化
     optimizePackageImports: ['lucide-react'],
-    
-    // 啟用並發功能
-    serverComponentsExternalPackages: [],
   },
   
   // 編譯器優化
