@@ -205,6 +205,11 @@ body {
   * {
     -webkit-overflow-scrolling: touch;
   }
+  
+  /* 流體排版 - 啟用 clamp() 函數 */
+  h1 { font-size: clamp(1.875rem, 4vw + 1rem, 3rem); }
+  h2 { font-size: clamp(1.5rem, 3vw + 0.8rem, 2.25rem); }
+  p  { font-size: clamp(1rem, 2vw + 0.5rem, 1.125rem); }
 }
 
 @layer utilities {
@@ -212,6 +217,7 @@ body {
   .container-responsive {
     @apply w-full mx-auto px-4 tablet:px-6 laptop:px-8;
     max-width: 100%;
+    box-sizing: border-box;
   }
   
   @media (min-width: 640px) {
@@ -232,20 +238,47 @@ body {
     }
   }
   
+  /* 防止內容溢出 */
+  .prevent-overflow {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+  }
+  
+  .content-constrained {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
   /* 觸摸友好的按鈕 */
   .btn-touch {
     @apply flex items-center justify-center;
-    @apply px-4 py-3 rounded-lg;
+    @apply px-3 py-2 rounded-lg;
     @apply transition-all duration-200 ease-out;
-    @apply focus:outline-none focus:ring-4 focus:ring-blue-500/20;
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500/20;
     min-height: 44px;
     min-width: 44px;
   }
   
   .btn-touch-lg {
-    @apply px-6 py-4 rounded-xl;
-    min-height: 56px;
-    min-width: 56px;
+    @apply px-4 py-3 rounded-lg;
+    min-height: 50px;
+    min-width: 50px;
+  }
+  
+  /* 桌面端按鈕尺寸優化 */
+  @media (min-width: 1024px) {
+    .btn-touch {
+      @apply px-4 py-2;
+      min-height: 40px;
+    }
+    
+    .btn-touch-lg {
+      @apply px-6 py-3;
+      min-height: 48px;
+    }
   }
   
   /* 移動端卡片樣式 */
@@ -733,8 +766,16 @@ body {
   
   .card-grid-responsive {
     display: grid;
-    gap: clamp(1rem, 2vw, 2rem);
-    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: clamp(0.75rem, 2vw, 1.5rem);
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  }
+  
+  /* 移動端優化 */
+  @media (max-width: 640px) {
+    .card-grid-responsive {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
   }
   
   /* Flexbox 佈局工具 */
@@ -780,6 +821,14 @@ body {
     flex-direction: column;
     gap: clamp(1rem, 2vw, 2rem);
     padding: clamp(1rem, 3vw, 3rem);
+  }
+  
+  /* 移動端內容區域優化 */
+  @media (max-width: 640px) {
+    .content-area {
+      gap: 1rem;
+      padding: 1rem;
+    }
   }
   
   /* 側邊欄佈局 */

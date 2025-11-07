@@ -127,7 +127,7 @@ export const DebateControlPanel: React.FC<DebateControlPanelProps> = ({
             <div className="flex gap-2">
               <button
                 onClick={handleStartWithTopic}
-                className="btn-touch-lg flex-1 tablet:flex-none px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm tablet:text-base"
+                className="btn-touch flex-1 tablet:flex-none bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
               >
                 開始
               </button>
@@ -136,7 +136,7 @@ export const DebateControlPanel: React.FC<DebateControlPanelProps> = ({
                   setShowTopicInput(false);
                   setInitialTopic('');
                 }}
-                className="btn-touch-lg flex-1 tablet:flex-none px-4 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors text-sm tablet:text-base"
+                className="btn-touch flex-1 tablet:flex-none bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors text-sm"
               >
                 取消
               </button>
@@ -155,18 +155,20 @@ export const DebateControlPanel: React.FC<DebateControlPanelProps> = ({
             <button
               onClick={() => setShowTopicInput(true)}
               disabled={disabled || loading}
-              className="btn-touch-lg flex items-center justify-center px-4 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-feedback text-sm tablet:text-base"
+              className="btn-touch flex items-center justify-center bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-feedback text-sm"
             >
-              <span className="mr-2 text-lg">▶️</span>
-              設定議題開始
+              <span className="mr-2">▶️</span>
+              <span className="hidden tablet:inline">設定議題開始</span>
+              <span className="tablet:hidden">設定開始</span>
             </button>
             <button
               onClick={() => onStart()}
               disabled={disabled || loading}
-              className="btn-touch-lg flex items-center justify-center px-4 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-feedback text-sm tablet:text-base"
+              className="btn-touch flex items-center justify-center bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-feedback text-sm"
             >
-              <span className="mr-2 text-lg">🚀</span>
-              直接開始
+              <span className="mr-2">🚀</span>
+              <span className="hidden tablet:inline">直接開始</span>
+              <span className="tablet:hidden">開始</span>
             </button>
           </>
         )}
@@ -175,10 +177,11 @@ export const DebateControlPanel: React.FC<DebateControlPanelProps> = ({
           <button
             onClick={onPause}
             disabled={disabled}
-            className="btn-touch-lg flex items-center justify-center px-4 py-4 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-feedback text-sm tablet:text-base"
+            className="btn-touch flex items-center justify-center bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-feedback text-sm"
           >
-            <span className="mr-2 text-lg">⏸️</span>
-            暫停
+            <span className="mr-2">⏸️</span>
+            <span className="hidden tablet:inline">暫停</span>
+            <span className="tablet:hidden">暫停</span>
           </button>
         )}
 
@@ -186,10 +189,11 @@ export const DebateControlPanel: React.FC<DebateControlPanelProps> = ({
           <button
             onClick={onResume}
             disabled={disabled || loading}
-            className="btn-touch-lg flex items-center justify-center px-4 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-feedback text-sm tablet:text-base"
+            className="btn-touch flex items-center justify-center bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-feedback text-sm"
           >
-            <span className="mr-2 text-lg">▶️</span>
-            繼續
+            <span className="mr-2">▶️</span>
+            <span className="hidden tablet:inline">繼續</span>
+            <span className="tablet:hidden">繼續</span>
           </button>
         )}
 
@@ -197,10 +201,11 @@ export const DebateControlPanel: React.FC<DebateControlPanelProps> = ({
           <button
             onClick={onStop}
             disabled={disabled}
-            className="btn-touch-lg flex items-center justify-center px-4 py-4 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-feedback text-sm tablet:text-base"
+            className="btn-touch flex items-center justify-center bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-feedback text-sm"
           >
-            <span className="mr-2 text-lg">⏹️</span>
-            停止
+            <span className="mr-2">⏹️</span>
+            <span className="hidden tablet:inline">停止</span>
+            <span className="tablet:hidden">停止</span>
           </button>
         )}
       </div>
@@ -211,24 +216,26 @@ export const DebateControlPanel: React.FC<DebateControlPanelProps> = ({
           <button
             onClick={onNextRound}
             disabled={disabled}
-            className="btn-touch-lg flex items-center justify-center px-4 py-4 tablet:py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-feedback text-sm tablet:text-base"
+            className="btn-touch flex items-center justify-center bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-feedback text-sm"
           >
-            <span className="mr-2 text-lg">⏭️</span>
-            下一輪
+            <span className="mr-2">⏭️</span>
+            <span className="hidden tablet:inline">下一輪</span>
+            <span className="tablet:hidden">下一輪</span>
           </button>
         )}
 
         <button
           onClick={handleReset}
           disabled={disabled || loading}
-          className={`btn-touch-lg flex items-center justify-center px-4 py-4 tablet:py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed touch-feedback text-sm tablet:text-base ${
+          className={`btn-touch flex items-center justify-center rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed touch-feedback text-sm ${
             showConfirmReset
               ? 'bg-red-600 text-white hover:bg-red-700'
               : 'bg-gray-600 text-white hover:bg-gray-700'
           }`}
         >
-          <span className="mr-2 text-lg">{showConfirmReset ? '⚠️' : '🔄'}</span>
-          {showConfirmReset ? '確認重置' : '重置'}
+          <span className="mr-2">{showConfirmReset ? '⚠️' : '🔄'}</span>
+          <span className="hidden tablet:inline">{showConfirmReset ? '確認重置' : '重置'}</span>
+          <span className="tablet:hidden">{showConfirmReset ? '確認' : '重置'}</span>
         </button>
       </div>
 

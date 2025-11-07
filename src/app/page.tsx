@@ -34,13 +34,13 @@ export default function Home() {
   }
 
   return (
-    <div className="layout-grid-simple min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="layout-grid-simple min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 content-constrained">
       <header className="grid-area-header">
         <div className="content-area text-center">
-          <h1 className="fluid-heading-1 font-bold text-gray-900 fluid-space-md">
+          <h1 className="fluid-heading-1 font-bold text-gray-900 fluid-space-md prevent-overflow">
             虛擬會議室
           </h1>
-          <p className="fluid-body text-gray-600 max-w-2xl mx-auto">
+          <p className="fluid-body text-gray-600 max-w-2xl mx-auto prevent-overflow">
             AI 驅動的智能辯論平台，讓不同角色的虛擬替身針對議題進行深度討論並達成共識
           </p>
         </div>
@@ -50,20 +50,20 @@ export default function Home() {
         <div className="content-area">
           {/* Quick Stats */}
           <div className="card-grid-responsive">
-            <div className="bg-white rounded-lg shadow-md fluid-padding-lg text-center">
-              <Users className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+            <div className="bg-white rounded-lg shadow-md fluid-padding-lg text-center prevent-overflow">
+              <Users className="w-6 h-6 text-blue-600 mx-auto mb-2" />
               <h3 className="fluid-heading-3 font-semibold text-gray-900">6 個預設替身</h3>
-              <p className="fluid-small text-gray-600">CEO、CTO、CFO 等專業角色</p>
+              <p className="fluid-small text-gray-600 prevent-overflow">CEO、CTO、CFO 等專業角色</p>
             </div>
-            <div className="bg-white rounded-lg shadow-md fluid-padding-lg text-center">
-              <MessageSquare className="w-8 h-8 text-green-600 mx-auto mb-2" />
+            <div className="bg-white rounded-lg shadow-md fluid-padding-lg text-center prevent-overflow">
+              <MessageSquare className="w-6 h-6 text-green-600 mx-auto mb-2" />
               <h3 className="fluid-heading-3 font-semibold text-gray-900">智能辯論</h3>
-              <p className="fluid-small text-gray-600">基於 Chain of Thought 推理</p>
+              <p className="fluid-small text-gray-600 prevent-overflow">基於 Chain of Thought 推理</p>
             </div>
-            <div className="bg-white rounded-lg shadow-md fluid-padding-lg text-center">
-              <Settings className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+            <div className="bg-white rounded-lg shadow-md fluid-padding-lg text-center prevent-overflow">
+              <Settings className="w-6 h-6 text-purple-600 mx-auto mb-2" />
               <h3 className="fluid-heading-3 font-semibold text-gray-900">即時搜尋</h3>
-              <p className="fluid-small text-gray-600">Google Search grounding 支援</p>
+              <p className="fluid-small text-gray-600 prevent-overflow">Google Search grounding 支援</p>
             </div>
           </div>
 
@@ -73,10 +73,11 @@ export default function Home() {
               <h2 className="fluid-heading-2 font-bold text-gray-900">會議室</h2>
               <button
                 onClick={handleCreateRoom}
-                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="btn-touch flex items-center gap-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <Plus className="w-4 h-4" />
-                創建會議室
+                <span className="hidden tablet:inline">創建會議室</span>
+                <span className="tablet:hidden">創建</span>
               </button>
             </div>
 
@@ -91,9 +92,10 @@ export default function Home() {
               </p>
               <button
                 onClick={handleCreateRoom}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="btn-touch bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                創建會議室
+                <span className="hidden tablet:inline">創建會議室</span>
+                <span className="tablet:hidden">創建</span>
               </button>
             </div>
           ) : (

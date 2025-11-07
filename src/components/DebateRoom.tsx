@@ -3,6 +3,7 @@ import { MeetingRoom, Persona } from '@/types';
 import { useDebateControl } from '@/hooks/useDebateOrchestrator';
 import { useSwipe } from '../hooks/useSwipe';
 import { useMeetingRoomStore } from '@/stores';
+import { useContainerQuery } from '@/hooks/useContainerQuery'; // 添加這一行
 import { DebateViewer } from './DebateViewer';
 import { DebateControlPanel } from './DebateControlPanel';
 import { ConsensusDisplay } from './ConsensusDisplay';
@@ -15,16 +16,16 @@ import { MobileNavigation } from './MobileNavigation';
 interface DebateRoomProps {
   room: MeetingRoom;
   onRoomUpdate?: (room: MeetingRoom) => void;
-  onDebateComplete?: (result: unknown) => void;
 }
 
 export const DebateRoom: React.FC<DebateRoomProps> = ({
   room,
   onRoomUpdate,
-  
 }) => {
   const [activeTab, setActiveTab] = useState<'debate' | 'consensus' | 'participants' | 'selection'>('debate');
   
+  // 使用容器查詢 hook 來檢測是否為移動端
+  const { isMatched: isMobile } = useContainerQuery(640);
   
   const tabs = ['selection', 'debate', 'consensus', 'participants'] as const;
   const currentTabIndex = tabs.indexOf(activeTab);
@@ -91,8 +92,6 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [debateStatus, isLoading, pauseDebate, resumeDebate, nextRound, stopDebate]);
 
-  
-
   // 滑動手勢處理
   const handleSwipeLeft = () => {
     if (currentTabIndex < tabs.length - 1) {
@@ -135,20 +134,22 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
   };
 
   return (
-    <div className="full-height-mobile flex flex-col bg-gray-100 safe-area-mobile">
-      {/* 移動端導航組件 */}
-      <MobileNavigation
-        currentTab={activeTab}
-        onTabChange={(tab) => setActiveTab(tab as typeof activeTab)}
-        participantCount={room.participants.length}
-        statementCount={statements.length}
-        onSettingsClick={() => {
-          // TODO: Implement mobile settings modal
-          console.log('Mobile settings clicked');
-        }}
-      />
+    <div className="full-height-mobile flex flex-col bg-gray-100 safe-area-mobile content-constrained">
+      {/* 根據是否為移動端顯示不同的導航組件 */}
+      {isMobile ? (
+        <MobileNavigation
+          currentTab={activeTab}
+          onTabChange={(tab) => setActiveTab(tab as typeof activeTab)}
+          participantCount={room.participants.length}
+          statementCount={statements.length}
+          onSettingsClick={() => {
+            console.log('Mobile settings clicked');
+          }}
+        />
+      ) : null}
+      
       {/* 頂部標題欄 - 響應式優化 */}
-      <div className="bg-white shadow-sm border-b border-gray-200 container-responsive py-4">
+      <div className="bg-white shadow-sm border-b border-gray-200 container-responsive py-4 prevent-overflow">
         <div className="flex items-center justify-between">
           <div className="flex-1 min-w-0">
             <h1 className="text-lg tablet:text-xl font-semibold text-gray-900 mb-2 prevent-overflow">{room.name}</h1>
@@ -189,7 +190,7 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
       </div>
 
       {/* 標籤導航 - 響應式優化 */}
-      <div className="bg-white border-b border-gray-200 nav-desktop">
+      <div className="bg-white border-b border-gray-200 nav-desktop prevent-overflow">
         <div className="container-responsive">
           <nav className="flex space-x-4 tablet:space-x-8 overflow-x-auto">
             {(['selection', 'debate', 'consensus', 'participants'] as const).map((tab) => {
@@ -394,58 +395,60 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
       </div>
 
       {/* 移動端底部導航 */}
-      <div className="nav-mobile">
-        <div className="flex justify-around items-center">
-          {(['selection', 'debate', 'consensus', 'participants'] as const).map((tab) => {
-            const count = getTabCount(tab);
-            return (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`btn-touch flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors relative ${
-                  activeTab === tab
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <span className="text-lg mb-1">{getTabIcon(tab)}</span>
-                <span className="text-xs font-medium">
-                  {tab === 'selection' && '選擇'}
-                  {tab === 'debate' && '辯論'}
-                  {tab === 'consensus' && '共識'}
-                  {tab === 'participants' && '參與'}
-                </span>
-                {count !== null && count > 0 && (
-                  <span className={`absolute -top-1 -right-1 px-1 py-0.5 rounded-full text-xs ${
+      {isMobile && (
+        <div className="nav-mobile">
+          <div className="flex justify-around items-center">
+            {(['selection', 'debate', 'consensus', 'participants'] as const).map((tab) => {
+              const count = getTabCount(tab);
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`btn-touch flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors relative ${
                     activeTab === tab
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-400 text-white'
-                  }`}>
-                    {count}
+                      ? 'bg-blue-50 text-blue-600'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  <span className="text-lg mb-1">{getTabIcon(tab)}</span>
+                  <span className="text-xs font-medium">
+                    {tab === 'selection' && '選擇'}
+                    {tab === 'debate' && '辯論'}
+                    {tab === 'consensus' && '共識'}
+                    {tab === 'participants' && '參與'}
                   </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-        
-        {/* 滑動指示器 */}
-        <div className="flex justify-center mt-1">
-          <div className="flex space-x-1">
-            {tabs.map((_, index) => (
-              <div
-                key={index}
-                className={`w-1 h-1 rounded-full transition-colors ${
-                  index === currentTabIndex ? 'bg-blue-500' : 'bg-gray-300'
-                }`}
-              />
-            ))}
+                  {count !== null && count > 0 && (
+                    <span className={`absolute -top-1 -right-1 px-1 py-0.5 rounded-full text-xs ${
+                      activeTab === tab
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-400 text-white'
+                    }`}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          
+          {/* 滑動指示器 */}
+          <div className="flex justify-center mt-1">
+            <div className="flex space-x-1">
+              {tabs.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-1 h-1 rounded-full transition-colors ${
+                    index === currentTabIndex ? 'bg-blue-500' : 'bg-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 浮動操作按鈕 - 移動端和平板端顯示 */}
-      {(debateStatus === 'idle' || debateStatus === 'paused') && room.participants.length >= 2 && (
+      {(debateStatus === 'idle' || debateStatus === 'paused') && room.participants.length >= 2 && isMobile && (
         <button
           onClick={() => {
             if (debateStatus === 'idle') {
@@ -461,7 +464,7 @@ export const DebateRoom: React.FC<DebateRoomProps> = ({
         </button>
       )}
 
-      {debateStatus === 'debating' && (
+      {debateStatus === 'debating' && isMobile && (
         <button
           onClick={pauseDebate}
           className="fab laptop:hidden"

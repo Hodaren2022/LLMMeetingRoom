@@ -130,9 +130,16 @@ export const TouchButton: React.FC<TouchButtonProps> = ({
 
   // 樣式類名
   const sizeClasses = {
-    sm: 'touch-target-sm text-sm px-3 py-1.5',
-    md: 'touch-target-md text-base px-4 py-2',
-    lg: 'touch-target-lg text-lg px-6 py-3'
+    sm: 'touch-target-sm text-xs px-2 py-1',
+    md: 'touch-target-md text-sm px-3 py-1.5',
+    lg: 'touch-target-lg text-base px-4 py-2'
+  };
+  
+  // 桌面端尺寸優化
+  const desktopSizeClasses = {
+    sm: 'laptop:text-sm laptop:px-3 laptop:py-1.5',
+    md: 'laptop:text-base laptop:px-4 laptop:py-2',
+    lg: 'laptop:text-lg laptop:px-6 laptop:py-3'
   };
 
   const variantClasses = {
@@ -148,6 +155,7 @@ export const TouchButton: React.FC<TouchButtonProps> = ({
     disabled:opacity-50 disabled:cursor-not-allowed
     gesture-area no-zoom
     ${sizeClasses[size]}
+    ${desktopSizeClasses[size]}
     ${variantClasses[variant]}
     ${isPressed ? 'scale-95' : ''}
     ${isLongPressing ? 'long-pressing' : ''}
